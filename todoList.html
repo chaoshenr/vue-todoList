@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TODOList</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        ul {
+            text-decoration: none;
+            list-style-type: none;
+        }
+        button {
+            cursor: pointer;
+        }
+        .todos-content {
+            width: 500px;
+            margin: 0 auto;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .todos-content .todo-item {
+            vertical-align: middle;
+            margin-top: 20px;
+            
+        }
+        .todos-content .todo-item span{
+            margin: 0 10px;
+        }
+        .todos-content .todo-item span.fufilled {
+            text-decoration: line-through;
+        }
+        .todos-content .todo-item button {
+            background: white;
+            border: none;
+            color: red;
+            font-size: 20px;
+            /* padding:0 8px; */
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .todos-content .todo-menu {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        .todos-content .todo-menu li {
+            margin: 0 20px;
+        }
+        .todos-content .todo-menu li button{
+            background: darkslateblue;
+            color: white;
+            padding: 10px;
+            border: none;
+            min-width: 80px;
+            text-align: center;
+        }
+        [type="text"] {
+            background: white;
+            padding: 8px;
+            width: 280px;
+        }
+        button.add-btn {
+            padding: 10px;
+            background: cornflowerblue;
+            color: white;
+            border: none;
+            appearance: none;
+        }
+        
+        .done {
+            display: none;
+        }
+        .undone {
+            display: none;
+        }
+    </style>
+    <script src="./lib/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <todo-content></todo-content>
+    </div>
+    <script>
+        var eventCenter = new Vue({
+            name: 'eventCenter'
+        })
+        // 事项组价，含完成和删除功能
+        var todoItem = Vue.component('todo-item',{
+            template: '<li class="todo-item">'+
+                '<input class="fulfill-btn" @click="fulfillToDo" type="checkbox" v-model:checked="todoItem.fufilled">'+
+                '<span :class="{fufilled: todoItem.fufilled}">{{ todoItem.info }}</span>'+
+                '<button type="button" class="delete-btn" @click="deleteToDo">×<button>'+
+            '</li>',
+            data: function () {
+                return {
+
+                }
+            },
+            props: ['todoItem'],
+            methods: {
+                fulfillToDo: function () {
+                    this.todoItem.fufilled = true;
+                },
+                deleteToDo: function () {
+                    this.$emit('delete');
+                }
+            }
+        })
+        // 事项列表容器组件，含事项列表增删改查
+        var todoContent = Vue.component('todo-content',{
+            template: 
+            '<div class="todos-content">'+
+                '<div class="add-wrapper">'+
+                    '<input type="text" v-model="todoInfo" @keyup.enter="addToDo(todoInfo)">'+
+                    '<button class="add-btn" @click="addToDo(todoInfo)">add</button>'+
+                '</div>'+
+                '<ul class="todo-list">'+
+                    '<todo-item :class="{done: filter.done && item.fufilled, undone: filter.undone && !item.fufilled}" v-for="(item, index) in todoList" :todo-item="item" :key="index" v-on:delete="deleteTodo(index)"></todo-item>'+
+                '</ul>'+
+                '<ul class="todo-menu">'+
+                    '<li><button @click="allTodos">all</button></li>'+
+                    '<li><button @click="doneTodos">done</button></li>'+
+                    '<li><button @click="undoneTodos">undone</button></li>'+
+                '</ul>'+
+                ''+
+            '</div>',
+            data: function () {
+                return {
+                    todoList: [],
+                    todoInfo: '',
+                    filter: {
+                        done: false,
+                        undone: false
+                    }
+                }
+            },
+            components: {
+                todoItem: todoItem
+            },
+            mounted: function () {
+                
+            },
+            methods: {
+                addToDo: function (info) {
+                    if (!info) {
+                        alert("请输入事项");
+                        return ;
+                    }
+                    var todoItem = {
+                        info: info,
+                        fufilled: false
+                    }
+                    this.todoList.push(todoItem);
+                },
+                deleteTodo: function (index) {
+                    this.todoList.splice(index, 1);
+                },
+                allTodos: function () {
+                    this.filter.done = false;
+                    this.filter.undone = false;
+                },
+                doneTodos: function () {
+                    this.filter.done = false;
+                    this.filter.undone = true;
+                },
+                undoneTodos: function () {
+                    this.filter.done = true;
+                    this.filter.undone = false;
+                }
+
+            }
+        })
+        
+        var vm = new Vue({
+            el: '#app',
+            data: function () {
+                return {
+                    list: []
+                }
+            },
+            methods: {
+                
+            },
+            components: {
+                todoContent: todoContent
+            }
+        })
+    </script>
+</body>
+</html>
